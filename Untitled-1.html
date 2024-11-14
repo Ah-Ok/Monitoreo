@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos de ThingSpeak</title>
+</head>
+<body>
+    <h1>Datos del Canal Privado</h1>
+    <p id="max-value">Máximo: Cargando...</p>
+    <p id="min-value">Mínimo: Cargando...</p>
+    <p id="average-value">Promedio: Cargando...</p>
+
+    <h2>Gráfica de Temperatura</h2>
+    <iframe src="https://thingspeak.com/channels/2743498/charts/1?bgcolor=%23ffffff&color=%23000000&dynamic=true&results=60" width="600" height="400"></iframe>
+
+    <h2>Gráfica de Humedad</h2>
+    <iframe src="https://thingspeak.com/channels/2743498/charts/2?bgcolor=%23ffffff&color=%23000000&dynamic=true&results=60" width="600" height="400"></iframe>
+
+    <h2>Gráfica de Luz</h2>
+    <iframe src="https://thingspeak.com/channels/2743498/charts/3?bgcolor=%23ffffff&color=%23000000&dynamic=true&results=60" width="600" height="400"></iframe>
+
+    <script>
+        const channelID = "2743498"; // Reemplaza con tu canal
+        const fieldID = 1; // Reemplaza con el número de campo
+        const apiKey = "TZXGM2S1S5ABQ6RC"; // Reemplaza con tu clave de lectura
+        const resultsCount = 100; // Número de datos recientes a obtener
+
+        function fetchData() {
+            const url = `https://api.thingspeak.com/channels/${channelID}/fields/${fieldID}.json?api_key=${apiKey}&results=${resultsCount}`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const feeds = data.feeds;
+                    const values = feeds.map(feed => parseFloat(feed["field" + fieldID])).filter(value => !isNaN(value));
+
+                    // Calcular Máximo, Mínimo y Promedio
+                    const maxValue = Math.max(...values);
+                    const minValue = Math.min(...values);
+                    const averageValue = values.reduce((sum, value) => sum + value, 0) / values.length;
+
+                    // Mostrar resultados
+                    document.getElementById("max-value").innerText = `Máximo: ${maxValue.toFixed(2)}`;
+                    document.getElementById("min-value").innerText = `Mínimo: ${minValue.toFixed(2)}`;
+                    document.getElementById("average-value").innerText = `Promedio: ${averageValue.toFixed(2)}`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById("max-value").innerText = "Máximo: Error al obtener datos";
+                    document.getElementById("min-value").innerText = "Mínimo: Error al obtener datos";
+                    document.getElementById("average-value").innerText = "Promedio: Error al obtener datos";
+                });
+        }
+
+        // Llamada a la función para obtener los datos
+        fetchData();
+    </script>
+</body>
+</html>
+
+
